@@ -35,7 +35,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 		mostrarCartas(jogador);
 
 		if (seEhSuaVez(jogador)) {
-			System.out.println(jogador.getNome() + " é sua vez de jogar!");
+			System.out.println(jogador.getNome() + " ÔøΩ sua vez de jogar!");
 			verificaOpcoesDeJogo();
 		}
 	}
@@ -43,7 +43,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 	private void mostrarCartas(IJogador jogador) {
 		List<ICarta> cartas = jogador.getCartas();
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Você tem agora as seguintes cartas:");
+			System.out.println("VocÔøΩ tem agora as seguintes cartas:");
 		} else {
 			System.out.println("O jogador " + jogador.getNome()
 					+ " tem agora as cartas:");
@@ -54,7 +54,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 		}
 
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Sua pontuacao atual é "
+			System.out.println("Sua pontuacao atual ÔøΩ "
 					+ jogador.getPontuacaoCartas());
 		}
 	}
@@ -81,7 +81,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 			String opcao = scanner.next();
 			Matcher m = p.matcher(opcao);
 			if (!m.matches()) {
-				System.out.println("Opção inválida!");
+				System.out.println("Op√ß√£o inv√°lida!");
 				mostrarOpcoes();
 			} else {
 				if (opcao.equals("p") || opcao.equals("P")) {
@@ -97,7 +97,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 	}
 
 	private void mostrarOpcoes() {
-		System.out.println("Escolha uma das opções abaixo:");
+		System.out.println("Escolha uma das op√ß√µes abaixo:");
 		System.out
 				.println("[P]Pedir Mais 1 Carta  [D]Desafiar o Croupier [T]Terminar a Jogada");
 	}
@@ -119,11 +119,11 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 			throws RemoteException {
 		mostrarCartas(jogador);
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Que pena você estourou a pontuação! Você fez "
+			System.out.println("Que pena vocÔøΩ estourou a pontuaÔøΩÔøΩo! VocÔøΩ fez "
 					+ jogador.getPontuacaoCartas() + " pontos");
 		} else {
 			System.out.println("O jogador " + jogador.getNome()
-					+ "estourou a pontuação! Ele fez"
+					+ "estourou a pontuaÔøΩÔøΩo! Ele fez"
 					+ jogador.getPontuacaoCartas() + " pontos");
 		}
 	}
@@ -133,7 +133,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 			throws RemoteException {
 		mostrarCartas(jogador);
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Você ganhou o jogo! Parabéns!");
+			System.out.println("VocÔøΩ ganhou o jogo! ParabÔøΩns!");
 		} else {
 			System.out.println("O jogador " + jogador.getNome()
 					+ "venceu o jogo por fazer um BlackJack!");

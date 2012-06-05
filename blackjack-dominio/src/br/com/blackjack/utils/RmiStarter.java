@@ -2,7 +2,7 @@ package br.com.blackjack.utils;
 
 /**
  * 
- * @author leandro
+ * @author fernando
  * 
  */
 public abstract class RmiStarter {
@@ -10,17 +10,17 @@ public abstract class RmiStarter {
 	/**
 	 * 
 	 * @param clazz
-	 *            a class that should be in the java.rmi.server.codebase
-	 *            property.
+	 *            - a classe que deve ser colocada na propriedade
+	 *            java.rmi.server.codebase
+	 * 
 	 */
 	public RmiStarter(Class<?> clazz) {
 
-		System.setProperty("java.rmi.server.codebase",
-				clazz.getProtectionDomain()
-						.getCodeSource().getLocation().toString());
+		System.setProperty("java.rmi.server.codebase", clazz
+				.getProtectionDomain().getCodeSource().getLocation().toString());
 
-		System.out.println(clazz.getProtectionDomain()
-				.getCodeSource().getLocation().toString());
+		System.out.println(clazz.getProtectionDomain().getCodeSource()
+				.getLocation().toString());
 
 		System.setProperty("java.security.policy",
 				PolicyFileLocator.getLocationOfPolicyFile());
@@ -33,7 +33,7 @@ public abstract class RmiStarter {
 	}
 
 	/**
-	 * extend this class and do RMI handling here
+	 * ponto de extensão da class
 	 */
 	public abstract void doCustomRmiHandling();
 
