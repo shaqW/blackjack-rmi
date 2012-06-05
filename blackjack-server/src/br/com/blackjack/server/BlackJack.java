@@ -2,7 +2,6 @@ package br.com.blackjack.server;
 
 import java.rmi.RemoteException;
 import java.util.LinkedList;
-import java.util.Random;
 
 import br.com.blackjack.dominio.IBlackJack;
 import br.com.blackjack.dominio.IJogador;
@@ -28,16 +27,30 @@ public class BlackJack implements IBlackJack {
 		jogadores = new LinkedList<IJogador>();
 	}
 
-	public IJogador adicionarJogador(String nome) throws RemoteException {
+	public IJogador adicionarJogador(String nome, IJogadorListener listener)
+			throws RemoteException {
 		Jogador j = new Jogador(nome);
 
 		this.jogadores.add(j);
+		this.adicionaJogadorListener(j, listener);
 
-		if (jogadores.size() >= 3) {
+		notificaEntradaJogador(j);
+
+		if (jogadores.size() >= 2) {
 			iniciar();
 		}
 
 		return j;
+	}
+
+	private void notificaEntradaJogador(IJogador jogador) {
+		for (IJogadorListener listener : this.listeners) {
+			try {
+				listener.notificarEntradaJogador(jogador);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void iniciar() {
@@ -67,6 +80,37 @@ public class BlackJack implements IBlackJack {
 
 	private void pedirCarta(IJogador jogador) {
 		jogador.adicionarCarta(this.baralho.proximaCarta());
+
+		for (IJogadorListener listener : this.listeners) {
+			try {
+				if (jogador.getPontuacaoCartas() > 21) {
+					listener.notificaEstouroPontuacao(jogador);
+				} else {
+					if (jogador.getPontuacaoCartas() == 21) {
+						listener.notificaVencedorPorBlackJack(jogador);
+					} else {
+						notificarCartaRetirada(jogador, listener);
+					}
+				}
+
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		if (jogador.getPontuacaoCartas() > 21) {
+			this.proximoTurno();
+		}
+	}
+
+	private void notificarCartaRetirada(IJogador jogador,
+			IJogadorListener listener) throws RemoteException {
+		if (jogadorAtual != null) {
+			listener.notificaCartaRetirada(jogador);
+		} else {
+			listener.notificaInicioJogo(jogador);
+		}
 	}
 
 	private void darCartaAoCroupier() {
@@ -92,16 +136,12 @@ public class BlackJack implements IBlackJack {
 	public void proximoTurno() {
 		try {
 			jogadorAtual = this.jogadoresTurno.poll();
-			listeners.peek().notificaTurno(jogadorAtual);
+			if (jogadorAtual != null) {
+				listeners.peek().notificaTurno(jogadorAtual);
+			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private Long gerarId() {
-		Random r = new Random(System.currentTimeMillis());
-		Long jogadorId = r.nextLong();
-		return jogadorId;
 	}
 
 	@Override
@@ -114,9 +154,9 @@ public class BlackJack implements IBlackJack {
 		return this.croupier;
 	}
 
-	@Override
-	public void adicionaJogadorListener(IJogadorListener listener)
+	private void adicionaJogadorListener(IJogador j, IJogadorListener listener)
 			throws RemoteException {
+		listener.setJogadorAtual(j);
 		listeners.add(listener);
 	}
 }
