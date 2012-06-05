@@ -10,22 +10,31 @@ import br.com.blackjack.server.BlackJack;
 import br.com.blackjack.server.dominio.Jogador;
 
 public class BlackjackUnitTest {
+	BlackJack jogo = new BlackJack();
 
 	@Test
 	public void deveriaInicarJogo() {
-		BlackJack jogo = new BlackJack();
+		Thread t1 = new Thread(new EntrarNoJogo("leandro"), "leandro");
+		Thread t2 = new Thread(new EntrarNoJogo("leandro"), "leandro");
+		Thread t3 = new Thread(new EntrarNoJogo("leandro"), "leandro");
+	}
 
-		try {
-			jogo.adicionarJogador("Leandro");
-			jogo.adicionaJogadorListener(new TurnoJogadorListener());
+	class EntrarNoJogo implements Runnable {
 
-			jogo.adicionarJogador("Aline");
-			jogo.adicionaJogadorListener(new TurnoJogadorListener());
+		private String nome;
 
-			jogo.adicionarJogador("Gustavo");
-			jogo.adicionaJogadorListener(new TurnoJogadorListener());
-		} catch (RemoteException e) {
-			e.printStackTrace();
+		public EntrarNoJogo(String nome) {
+			this.nome = nome;
+		}
+
+		@Override
+		public void run() {
+			try {
+				jogo.adicionarJogador(nome, new TurnoJogadorListener(jogo));
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}

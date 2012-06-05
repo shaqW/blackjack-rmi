@@ -4,6 +4,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Random;
 
 import br.com.blackjack.dominio.IBlackJack;
 import br.com.blackjack.utils.RmiStarter;
@@ -20,9 +21,9 @@ public class BlackjackClient extends RmiStarter {
 			Registry r = LocateRegistry.getRegistry(2005);
 
 			IBlackJack jogo = (IBlackJack) r.lookup(IBlackJack.ID);
-			jogo.adicionaJogadorListener(new TurnoJogadorListener());
+			TurnoJogadorListener listener = new TurnoJogadorListener(jogo);
+			jogo.adicionarJogador("Leandro" + new Random().nextInt(20), listener);
 
-			jogo.adicionarJogador("Leandro");
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
