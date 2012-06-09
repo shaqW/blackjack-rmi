@@ -2,10 +2,8 @@ package br.com.blackjack.client;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import br.com.blackjack.dominio.IBlackJack;
 import br.com.blackjack.dominio.ICarta;
@@ -17,17 +15,17 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 
 	IBlackJack jogo;
 
-	IJogador jogadorAtual;
-
-	Scanner scanner = new Scanner(System.in);
+	LeitorOpcoes leitor;
 
 	public TurnoJogadorListener(IBlackJack jogo) throws RemoteException {
 		super();
 		this.jogo = jogo;
-	}
 
-	public void setJogadorAtual(IJogador jogadorAtual) {
-		this.jogadorAtual = jogadorAtual;
+		try {
+			leitor = new LeitorOpcoes(jogo, System.in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -35,36 +33,78 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 		mostrarCartas(jogador);
 
 		if (seEhSuaVez(jogador)) {
-			System.out.println(jogador.getNome() + " ÔøΩ sua vez de jogar!");
-			verificaOpcoesDeJogo();
+			System.out.println(jogador.getNome() + " é sua vez de jogar!");
+			verificaOpcoesDeJogo(jogador);
 		}
 	}
 
 	private void mostrarCartas(IJogador jogador) {
+		System.out.println("#############################################");
+		mostarCartasCroupier();
+		System.out.println("---------------------------------\n");
+
+		mostrarCartasJogadores();
+
+		System.out.println("\n#############################################");
+	}
+
+	private void mostrarCartasJogadores() {
+		String jogadorStr = "";
+		try {
+			List<IJogador> jogadores = jogo.getJogadores();
+			Iterator<IJogador> it = jogadores.iterator();
+			while (it.hasNext()) {
+				IJogador jog = it.next();
+				jogadorStr = "";
+				jogadorStr += "### " + jog.getNome() + " => "
+						+ montarStrCartas(jog) + " ###";
+				System.out.print(jogadorStr);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void mostarCartasCroupier() {
+		System.out.println("#### Croupier ####");
+		IJogador croupier = null;
+		String cartasStr = "";
+		try {
+			croupier = jogo.getCroupier();
+
+			cartasStr = montarStrCartas(croupier);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("###### " + cartasStr + " #######");
+	}
+
+	private String montarStrCartas(IJogador jogador) {
 		List<ICarta> cartas = jogador.getCartas();
-		if (seEhSuaVez(jogador)) {
-			System.out.println("VocÔøΩ tem agora as seguintes cartas:");
-		} else {
-			System.out.println("O jogador " + jogador.getNome()
-					+ " tem agora as cartas:");
+		Iterator<ICarta> it = cartas.iterator();
+		String cartasStr = "";
+		while (it.hasNext()) {
+			ICarta c = it.next();
+			cartasStr += c.isViradaParaBaixo() ? "??" : c.getPontuacao();
+			if (it.hasNext()) {
+				cartasStr += ", ";
+			}
 		}
 
-		for (ICarta c : cartas) {
-			System.out.println(c.getPontuacao());
-		}
-
-		if (seEhSuaVez(jogador)) {
-			System.out.println("Sua pontuacao atual ÔøΩ "
-					+ jogador.getPontuacaoCartas());
-		}
+		return cartasStr;
 	}
 
 	@Override
 	public void notificaCartaRetirada(IJogador jogador) throws RemoteException {
+		if (jogo.getJogadorAtual().getNome().equalsIgnoreCase("croupier")) {
+			System.out.println("Todos os jogadores já pegaram suas cartas");
+		}
+
 		mostrarCartas(jogador);
 
 		if (seEhSuaVez(jogador)) {
-			verificaOpcoesDeJogo();
+			verificaOpcoesDeJogo(jogador);
 		}
 	}
 
@@ -73,58 +113,43 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 		mostrarCartas(jogador);
 	}
 
-	private void verificaOpcoesDeJogo() {
-		mostrarOpcoes();
-
-		Pattern p = Pattern.compile("[PpDdTt]");
-		while (scanner.hasNext()) {
-			String opcao = scanner.next();
-			Matcher m = p.matcher(opcao);
-			if (!m.matches()) {
-				System.out.println("Op√ß√£o inv√°lida!");
-				mostrarOpcoes();
-			} else {
-				if (opcao.equals("p") || opcao.equals("P")) {
-					try {
-						jogo.pedirCarta();
-						break;
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}
+	private void verificaOpcoesDeJogo(IJogador jogador) {
+		if (seEhSuaVez(jogador)) {
+			Thread t = new Thread(leitor);
+			t.start();
 		}
-	}
-
-	private void mostrarOpcoes() {
-		System.out.println("Escolha uma das op√ß√µes abaixo:");
-		System.out
-				.println("[P]Pedir Mais 1 Carta  [D]Desafiar o Croupier [T]Terminar a Jogada");
 	}
 
 	@Override
 	public void notificarEntradaJogador(IJogador jogador)
 			throws RemoteException {
-		if (seEhSuaVez(jogador)) {
-			System.out.println(jogador.getNome() + " entrou no jogo");
-		}
+		System.out.println(jogador.getNome() + " entrou no jogo");
 	}
 
 	private boolean seEhSuaVez(IJogador jogador) {
-		return jogador.getNome().equalsIgnoreCase(jogadorAtual.getNome());
+		try {
+			IJogador jogadorAtual = jogo.getJogadorAtual();
+			if (jogadorAtual != null && jogador != null) {
+				return jogador.getNome().equalsIgnoreCase(
+						jogadorAtual.getNome());
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 
 	@Override
 	public void notificaEstouroPontuacao(IJogador jogador)
 			throws RemoteException {
-		mostrarCartas(jogador);
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Que pena vocÔøΩ estourou a pontuaÔøΩÔøΩo! VocÔøΩ fez "
+			System.out.println("Que pena você estourou a pontuação! Você fez "
 					+ jogador.getPontuacaoCartas() + " pontos");
 		} else {
-			System.out.println("O jogador " + jogador.getNome()
-					+ "estourou a pontuaÔøΩÔøΩo! Ele fez"
-					+ jogador.getPontuacaoCartas() + " pontos");
+			System.out.println("O jogador " + jogo.getJogadorAtual().getNome()
+					+ " estourou a pontuação! Ele fez"
+					+ jogo.getJogadorAtual().getPontuacaoCartas() + " pontos");
 		}
 	}
 
@@ -133,10 +158,33 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 			throws RemoteException {
 		mostrarCartas(jogador);
 		if (seEhSuaVez(jogador)) {
-			System.out.println("VocÔøΩ ganhou o jogo! ParabÔøΩns!");
+			System.out.println("Você ganhou o jogo! Parabéns!");
 		} else {
-			System.out.println("O jogador " + jogador.getNome()
-					+ "venceu o jogo por fazer um BlackJack!");
+			System.out.println("O jogador " + jogo.getJogadorAtual().getNome()
+					+ " venceu o jogo por fazer um BlackJack!");
 		}
+	}
+
+	@Override
+	public void notificarFimJogo(IJogador jogador) throws RemoteException {
+		mostrarCartas(jogador);
+		
+		List<IJogador> jogadores = jogo.getJogadores();
+		for (IJogador j : jogadores) {
+			if (j.getPontuacaoCartas() > jogo.getCroupier()
+					.getPontuacaoCartas()) {
+				System.out.println("Jogador " + j.getNome()
+						+ " venceu o Croupier! Parabéns!");
+			} else {
+				System.out
+						.println("Jogador "
+								+ j.getNome()
+								+ " perdeu para o Croupier! Mais sorte da próxima vez!");
+			}
+		}
+
+		System.out.println("####################################");
+		System.out.println("####### Vamos recomeçar o jogo! #######");
+		System.out.println("####################################");
 	}
 }
