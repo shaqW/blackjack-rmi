@@ -29,7 +29,7 @@ public class BlackJack implements IBlackJack {
 
 	public IJogador adicionarJogador(String nome, IJogadorListener listener)
 			throws RemoteException {
-		Jogador j = new Jogador(nome);
+		Jogador j = new Jogador(nome + "_" + (this.jogadores.size() + 1));
 
 		this.jogadores.add(j);
 		this.adicionaJogadorListener(j, listener);
@@ -61,17 +61,35 @@ public class BlackJack implements IBlackJack {
 
 		this.darCartaAoCroupier();
 
+		for (IJogador j : jogadores) {
+			j.limparCartas();
+		}
+
 		this.jogadoresTurno = new LinkedList<IJogador>(this.jogadores);
 
 		// inicialmente d‡ 2 cartas
 		this.darCartaParaCadaJogador();
 		this.darCartaParaCadaJogador();
 
-		this.proximoTurno();
+		// this.proximoTurno();
+		jogadorAtual = this.jogadoresTurno.poll();
+
+		try {
+			this.notificarCartaRetirada();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void pedirCarta() {
 		pedirCarta(jogadorAtual);
+
+		try {
+			this.notificarCartaRetirada();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void passarTurno() {
@@ -81,22 +99,23 @@ public class BlackJack implements IBlackJack {
 	private void pedirCarta(IJogador jogador) {
 		jogador.adicionarCarta(this.baralho.proximaCarta());
 
+		int index = 0;
 		for (IJogadorListener listener : this.listeners) {
 			try {
 				if (jogador.getPontuacaoCartas() > 21) {
-					listener.notificaEstouroPontuacao(jogador);
+					listener.notificaEstouroPontuacao(this.jogadores.get(index));
 				} else {
 					if (jogador.getPontuacaoCartas() == 21) {
-						listener.notificaVencedorPorBlackJack(jogador);
-					} else {
-						notificarCartaRetirada(jogador, listener);
+						listener.notificaVencedorPorBlackJack(this.jogadores
+								.get(index));
+						listener.notificarFimJogo(this.jogadores.get(index));
 					}
 				}
-
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			index++;
 		}
 
 		if (jogador.getPontuacaoCartas() > 21) {
@@ -104,12 +123,16 @@ public class BlackJack implements IBlackJack {
 		}
 	}
 
-	private void notificarCartaRetirada(IJogador jogador,
-			IJogadorListener listener) throws RemoteException {
-		if (jogadorAtual != null) {
-			listener.notificaCartaRetirada(jogador);
-		} else {
-			listener.notificaInicioJogo(jogador);
+	private void notificarCartaRetirada() throws RemoteException {
+		int index = 0;
+		for (IJogadorListener listener : listeners) {
+			if (jogadorAtual != null) {
+				listener.notificaCartaRetirada(this.jogadores.get(index));
+			} else {
+				listener.notificaInicioJogo(this.jogadores.get(index));
+			}
+
+			index++;
 		}
 	}
 
@@ -123,8 +146,28 @@ public class BlackJack implements IBlackJack {
 		croupier.getCartas().get(0).setViradaParaBaixo(Boolean.FALSE);
 
 		do {
-			pedirCarta(croupier);
-		} while (croupier.getPontuacaoCartas() < 17);
+			croupier.adicionarCarta(this.baralho.proximaCarta());
+		} while (croupier.getPontuacaoCartas() <= 17);
+
+		int i = 0;
+		for (IJogadorListener listener : listeners) {
+			try {
+				listener.notificarFimJogo(jogadores.get(i));
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			i++;
+		}
+
+	}
+
+	public LinkedList<IJogador> getJogadores() {
+		return jogadores;
+	}
+
+	public void setJogadores(LinkedList<IJogador> jogadores) {
+		this.jogadores = jogadores;
 	}
 
 	private void darCartaParaCadaJogador() {
@@ -134,19 +177,23 @@ public class BlackJack implements IBlackJack {
 	}
 
 	public void proximoTurno() {
-		try {
-			jogadorAtual = this.jogadoresTurno.poll();
-			if (jogadorAtual != null) {
-				listeners.peek().notificaTurno(jogadorAtual);
+		jogadorAtual = this.jogadoresTurno.poll();
+		int index = 0;
+		for (IJogadorListener listener : listeners) {
+			try {
+				if (jogadorAtual != null) {
+					listener.notificaTurno(this.jogadores.get(index));
+				} else {
+					this.jogadorAtual = croupier;
+					this.pegarCartaCroupier();
+				}
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
 
-	@Override
-	public IJogador getJogador(Long id) {
-		return null;
+			index++;
+		}
 	}
 
 	@Override
@@ -156,7 +203,11 @@ public class BlackJack implements IBlackJack {
 
 	private void adicionaJogadorListener(IJogador j, IJogadorListener listener)
 			throws RemoteException {
-		listener.setJogadorAtual(j);
 		listeners.add(listener);
+	}
+
+	@Override
+	public IJogador getJogadorAtual() throws RemoteException {
+		return this.jogadorAtual;
 	}
 }

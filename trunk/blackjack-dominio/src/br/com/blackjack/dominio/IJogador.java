@@ -19,5 +19,7 @@ public interface IJogador extends Remote, Serializable {
 	List<ICarta> getCartas();
 	
 	int getPontuacaoCartas();
+	
+	void limparCartas();
 
 }

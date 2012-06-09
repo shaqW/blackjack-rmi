@@ -95,4 +95,11 @@ public class Jogador implements IJogador {
 	public String toString() {
 		return this.nome;
 	}
+
+	@Override
+	public void limparCartas() {
+		if (cartas != null) {
+			cartas.clear();
+		}
+	}
 }

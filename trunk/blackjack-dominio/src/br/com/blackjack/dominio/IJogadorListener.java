@@ -11,11 +11,11 @@ public interface IJogadorListener extends Remote {
 
 	void notificarEntradaJogador(IJogador jogador) throws RemoteException;
 
-	void setJogadorAtual(IJogador j) throws RemoteException;
-
 	void notificaInicioJogo(IJogador jogador) throws RemoteException;
 
 	void notificaEstouroPontuacao(IJogador jogador) throws RemoteException;
 
 	void notificaVencedorPorBlackJack(IJogador jogador) throws RemoteException;
+
+	void notificarFimJogo(IJogador jogador) throws RemoteException;
 }
