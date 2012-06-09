@@ -8,21 +8,27 @@ import java.rmi.registry.Registry;
 import br.com.blackjack.dominio.IBlackJack;
 import br.com.blackjack.utils.RmiStarter;
 
+/**
+ * Representa um cliente para o jogo de blackjack
+ * 
+ * @author fernando
+ * 
+ */
 public class BlackjackClient extends RmiStarter {
 
-	static int COUNT = 1;
-	
 	public BlackjackClient() {
 		super(BlackjackClient.class);
 	}
 
 	@Override
-	public void doCustomRmiHandling() {
+	public void trataInicioRmi() {
 		try {
+			// recupera o registry, onde fica localizado os dados do servidor
 			Registry r = LocateRegistry.getRegistry(2005);
 
+			// recupera uma instancia do jogo
 			IBlackJack jogo = (IBlackJack) r.lookup(IBlackJack.ID);
-			TurnoJogadorListener listener = new TurnoJogadorListener(jogo);
+			JogadorListener listener = new JogadorListener(jogo);
 			jogo.adicionarJogador("Jogador", listener);
 
 		} catch (RemoteException e) {

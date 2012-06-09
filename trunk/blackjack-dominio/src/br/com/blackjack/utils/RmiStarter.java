@@ -29,12 +29,12 @@ public abstract class RmiStarter {
 			System.setSecurityManager(new SecurityManager());
 		}
 
-		doCustomRmiHandling();
+		trataInicioRmi();
 	}
 
 	/**
 	 * ponto de extensão da class
 	 */
-	public abstract void doCustomRmiHandling();
+	public abstract void trataInicioRmi();
 
 }

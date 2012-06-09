@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import br.com.blackjack.client.TurnoJogadorListener;
+import br.com.blackjack.client.JogadorListener;
 import br.com.blackjack.server.BlackJack;
 import br.com.blackjack.server.dominio.Jogador;
 
@@ -30,7 +30,7 @@ public class BlackjackUnitTest {
 		@Override
 		public void run() {
 			try {
-				jogo.adicionarJogador(nome, new TurnoJogadorListener(jogo));
+				jogo.adicionarJogador(nome, new JogadorListener(jogo));
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

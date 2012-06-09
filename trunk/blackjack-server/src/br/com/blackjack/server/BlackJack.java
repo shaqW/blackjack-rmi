@@ -9,24 +9,44 @@ import br.com.blackjack.dominio.IJogadorListener;
 import br.com.blackjack.server.dominio.Baralho;
 import br.com.blackjack.server.dominio.Jogador;
 
+/**
+ * 
+ * Essa classe implementa uma verão simplificada do jogo Blackjack(21). O
+ * croupier recebe 2 cartas. 1 virada para baixo e outra virada para cima. Em
+ * seguida, cada jogador recebe 2 cartas viradas para cima. Cada jogador pode
+ * solicitar quantas cartas quiser ao croupier de modo que não ultrapasse 21
+ * pontos. Quando todos os jogadores comprarem suas cartas, o croupier pega
+ * novas carta para si. O vencedor será aquele que tiver mais pontos que o
+ * Croupier ou se alguém conseguir alcançar 21 pontos.
+ * 
+ */
 public class BlackJack implements IBlackJack {
 
+	// jogadores conectados ao jogo
 	LinkedList<IJogador> jogadores;
 
+	// turnos do jogo
 	LinkedList<IJogador> jogadoresTurno;
 
+	// croupier do jogo
 	IJogador croupier;
 
+	// Listeners do jogadores, para que os mesmos recebam atualizacoes do jogo
 	LinkedList<IJogadorListener> listeners = new LinkedList<IJogadorListener>();
 
+	// o jogo do turno atual
 	private IJogador jogadorAtual;
 
+	// o baralho que está sendo usado
 	private Baralho baralho;
 
 	public BlackJack() {
 		jogadores = new LinkedList<IJogador>();
 	}
 
+	/**
+	 * @see IBlackJack#adicionarJogador(String, IJogadorListener)
+	 */
 	public IJogador adicionarJogador(String nome, IJogadorListener listener)
 			throws RemoteException {
 		Jogador j = new Jogador(nome + "_" + (this.jogadores.size() + 1));
@@ -36,13 +56,19 @@ public class BlackJack implements IBlackJack {
 
 		notificaEntradaJogador(j);
 
-		if (jogadores.size() >= 2) {
+		// limitei o jogo para iniciar com 3 jogadores
+		if (jogadores.size() >= 3) {
 			iniciar();
 		}
 
 		return j;
 	}
 
+	/**
+	 * Notifica que um novo jogador se conectou ao jogo
+	 * 
+	 * @param jogador
+	 */
 	private void notificaEntradaJogador(IJogador jogador) {
 		for (IJogadorListener listener : this.listeners) {
 			try {
@@ -53,6 +79,9 @@ public class BlackJack implements IBlackJack {
 		}
 	}
 
+	/**
+	 * Inicializa o jogo
+	 */
 	public void iniciar() {
 		croupier = new Jogador("croupier");
 
@@ -71,17 +100,19 @@ public class BlackJack implements IBlackJack {
 		this.darCartaParaCadaJogador();
 		this.darCartaParaCadaJogador();
 
-		// this.proximoTurno();
+		// pega o primeiro jogador para jogar
 		jogadorAtual = this.jogadoresTurno.poll();
 
 		try {
 			this.notificarCartaRetirada();
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * @see IBlackJack#pedirCarta()
+	 */
 	public void pedirCarta() {
 		pedirCarta(jogadorAtual);
 
@@ -92,10 +123,34 @@ public class BlackJack implements IBlackJack {
 		}
 	}
 
+	/**
+	 * @see IBlackJack#passarTurno()
+	 */
 	public void passarTurno() {
-		this.proximoTurno();
+		jogadorAtual = this.jogadoresTurno.poll();
+		int index = 0;
+		for (IJogadorListener listener : listeners) {
+			try {
+				if (jogadorAtual != null) {
+					listener.notificaTurno(this.jogadores.get(index));
+				} else {
+					this.jogadorAtual = croupier;
+					this.pegarCartaCroupier();
+				}
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			index++;
+		}
 	}
 
+	/**
+	 * Solicita uma carta para um determinado jogador
+	 * 
+	 * @param jogador
+	 */
 	private void pedirCarta(IJogador jogador) {
 		jogador.adicionarCarta(this.baralho.proximaCarta());
 
@@ -119,10 +174,15 @@ public class BlackJack implements IBlackJack {
 		}
 
 		if (jogador.getPontuacaoCartas() > 21) {
-			this.proximoTurno();
+			this.passarTurno();
 		}
 	}
 
+	/**
+	 * Notifica para todos os listeners que uma carta foi retirada por alguém
+	 * 
+	 * @throws RemoteException
+	 */
 	private void notificarCartaRetirada() throws RemoteException {
 		int index = 0;
 		for (IJogadorListener listener : listeners) {
@@ -136,11 +196,17 @@ public class BlackJack implements IBlackJack {
 		}
 	}
 
+	/**
+	 * Tira uma nova carta para o Croupier para inicializar o jogo
+	 */
 	private void darCartaAoCroupier() {
 		croupier.adicionarCarta(baralho.proximaCartaViradaParaBaixo());
 		croupier.adicionarCarta(baralho.proximaCarta());
 	}
 
+	/**
+	 * Pega uma nova carta para o Croupier quando for sua vez
+	 */
 	private void pegarCartaCroupier() {
 		// desvirar carta
 		croupier.getCartas().get(0).setViradaParaBaixo(Boolean.FALSE);
@@ -170,29 +236,12 @@ public class BlackJack implements IBlackJack {
 		this.jogadores = jogadores;
 	}
 
+	/**
+	 * Tira um carta para cada jogador conectado ao jogo
+	 */
 	private void darCartaParaCadaJogador() {
 		for (IJogador j : jogadores) {
 			pedirCarta(j);
-		}
-	}
-
-	public void proximoTurno() {
-		jogadorAtual = this.jogadoresTurno.poll();
-		int index = 0;
-		for (IJogadorListener listener : listeners) {
-			try {
-				if (jogadorAtual != null) {
-					listener.notificaTurno(this.jogadores.get(index));
-				} else {
-					this.jogadorAtual = croupier;
-					this.pegarCartaCroupier();
-				}
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			index++;
 		}
 	}
 
@@ -201,6 +250,13 @@ public class BlackJack implements IBlackJack {
 		return this.croupier;
 	}
 
+	/**
+	 * Adiciona um novo listener de eventos do jogador
+	 * 
+	 * @param j
+	 * @param listener
+	 * @throws RemoteException
+	 */
 	private void adicionaJogadorListener(IJogador j, IJogadorListener listener)
 			throws RemoteException {
 		listeners.add(listener);

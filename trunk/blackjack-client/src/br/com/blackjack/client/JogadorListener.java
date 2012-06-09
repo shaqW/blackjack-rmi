@@ -10,19 +10,26 @@ import br.com.blackjack.dominio.ICarta;
 import br.com.blackjack.dominio.IJogador;
 import br.com.blackjack.dominio.IJogadorListener;
 
-public class TurnoJogadorListener extends UnicastRemoteObject implements
+/**
+ * Implementa um listener para os eventos do servidor. Nessa implementação, toda
+ * a interação com o usuário é feita pelo terminal
+ * 
+ * @author fernando
+ * 
+ */
+public class JogadorListener extends UnicastRemoteObject implements
 		IJogadorListener {
 
 	IBlackJack jogo;
 
 	LeitorOpcoes leitor;
 
-	public TurnoJogadorListener(IBlackJack jogo) throws RemoteException {
+	public JogadorListener(IBlackJack jogo) throws RemoteException {
 		super();
 		this.jogo = jogo;
 
 		try {
-			leitor = new LeitorOpcoes(jogo, System.in);
+			leitor = new LeitorOpcoes(jogo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -39,26 +46,26 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 	}
 
 	private void mostrarCartas(IJogador jogador) {
-		System.out.println("#############################################");
+		System.out.println("####################  MESA  #########################");
 		mostarCartasCroupier();
 		System.out.println("---------------------------------\n");
 
 		mostrarCartasJogadores();
 
-		System.out.println("\n#############################################");
+		System.out.println("\n###################################################");
 	}
 
 	private void mostrarCartasJogadores() {
-		String jogadorStr = "";
 		try {
 			List<IJogador> jogadores = jogo.getJogadores();
 			Iterator<IJogador> it = jogadores.iterator();
 			while (it.hasNext()) {
 				IJogador jog = it.next();
-				jogadorStr = "";
+				String jogadorStr = "";
 				jogadorStr += "### " + jog.getNome() + " => "
-						+ montarStrCartas(jog) + " ###";
-				System.out.print(jogadorStr);
+						+ montarStrCartas(jog) + " : "
+						+ jog.getPontuacaoCartas() + " pontos ###";
+				System.out.println(jogadorStr);
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -168,7 +175,7 @@ public class TurnoJogadorListener extends UnicastRemoteObject implements
 	@Override
 	public void notificarFimJogo(IJogador jogador) throws RemoteException {
 		mostrarCartas(jogador);
-		
+
 		List<IJogador> jogadores = jogo.getJogadores();
 		for (IJogador j : jogadores) {
 			if (j.getPontuacaoCartas() > jogo.getCroupier()

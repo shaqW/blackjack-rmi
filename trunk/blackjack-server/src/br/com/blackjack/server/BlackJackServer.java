@@ -8,6 +8,12 @@ import java.rmi.server.UnicastRemoteObject;
 import br.com.blackjack.dominio.IBlackJack;
 import br.com.blackjack.utils.RmiStarter;
 
+/**
+ * Representa o servidor do jogo
+ * 
+ * @author fernando
+ * 
+ */
 public class BlackJackServer extends RmiStarter {
 
 	public BlackJackServer() {
@@ -15,7 +21,7 @@ public class BlackJackServer extends RmiStarter {
 	}
 
 	@Override
-	public void doCustomRmiHandling() {
+	public void trataInicioRmi() {
 		try {
 			BlackJack bj = new BlackJack();
 			IBlackJack bjStub = (IBlackJack) UnicastRemoteObject.exportObject(

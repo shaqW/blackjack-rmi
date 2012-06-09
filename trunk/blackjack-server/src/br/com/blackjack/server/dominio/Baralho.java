@@ -6,13 +6,21 @@ import java.util.LinkedList;
 import br.com.blackjack.dominio.Figura;
 import br.com.blackjack.dominio.ICarta;
 
+/**
+ * Representa um baralho
+ * 
+ * @author fernando
+ * 
+ */
 public class Baralho {
 
+	// cartas do baralho
 	private LinkedList<ICarta> cartas;
 
 	public Baralho() {
 		this.cartas = new LinkedList<ICarta>();
 
+		// monta o baralho com 52 cartas
 		for (int naipeIndex = 0; naipeIndex < 4; naipeIndex++) {
 			// cartas numeradas
 			for (int i = 1; i <= 10; i++) {
@@ -30,12 +38,22 @@ public class Baralho {
 		}
 	}
 
+	/**
+	 * recupera a proxima carta do baralho
+	 * 
+	 * @return
+	 */
 	public ICarta proximaCarta() {
 		return !this.cartas.isEmpty() ? this.cartas.pop() : null;
 	}
 
+	/**
+	 * recupera um carta virada para baixo
+	 * 
+	 * @return
+	 */
 	public ICarta proximaCartaViradaParaBaixo() {
-		ICarta carta = !this.cartas.isEmpty() ? this.cartas.pop() : null;
+		ICarta carta = this.proximaCarta();
 		if (carta != null) {
 			carta.setViradaParaBaixo(Boolean.TRUE);
 		}
@@ -43,6 +61,9 @@ public class Baralho {
 		return carta;
 	}
 
+	/**
+	 * Embaralha as cartas do baralho
+	 */
 	public void embaralhar() {
 		Collections.shuffle(cartas);
 	}
