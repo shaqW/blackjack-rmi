@@ -8,24 +8,35 @@ import java.util.regex.Pattern;
 
 import br.com.blackjack.dominio.IBlackJack;
 
+/**
+ * Representa um leitor das opcoes que o jogador pode escolher durante o jogo O
+ * leitor implementa Runnable porque ele é executado por uma Thread para que não
+ * bloqueie os demais jogadores ao realizar a leitura dos dados do teclado
+ * 
+ * @author fernando
+ * 
+ */
 public class LeitorOpcoes implements Runnable {
 
 	IBlackJack jogo;
-	private InputStream input;
-	
+
 	static Scanner scanner = new Scanner(System.in);
 
-	public LeitorOpcoes(IBlackJack jogo, InputStream input) {
+	public LeitorOpcoes(IBlackJack jogo) {
 		this.jogo = jogo;
-		this.input = input;
 	}
 
+	/**
+	 * mostra as opcoes que os usuarios podem escolher
+	 */
 	public void mostrarOpcoes() {
 		System.out.println("Escolha uma das opções abaixo:");
-		System.out
-				.println("[P]Pedir Mais 1 Carta  [D]Desafiar o Croupier [T]Terminar a Jogada");
+		System.out.println("[P]Pedir Mais 1 Carta  ou [T]Terminar a Jogada");
 	}
 
+	/**
+	 * Fica lendo a entrado do teclado esperando a escolha do jogador
+	 */
 	public void verificar() {
 		Pattern p = Pattern.compile("[PpDdTt]");
 		mostrarOpcoes();
