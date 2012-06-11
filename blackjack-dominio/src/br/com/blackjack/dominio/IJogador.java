@@ -22,29 +22,30 @@ public interface IJogador extends Remote, Serializable {
 	void setNome(String nome);
 
 	/**
-	 * adiciona um nova carta para a m‹o do jogador
+	 * adiciona um nova carta para a mï¿½o do jogador
 	 * 
 	 * @param c
 	 */
 	void adicionarCarta(ICarta c);
 
 	/**
-	 * returna as cart‹o que o jogador tem na m‹o
+	 * returna as cartï¿½o que o jogador tem na mï¿½o
 	 * 
 	 * @return
 	 */
 	List<ICarta> getCartas();
 
 	/**
-	 * Recupera o total de pontos que o jogador tem com as cartas na m‹o
+	 * Recupera o total de pontos que o jogador tem com as cartas na mï¿½o
 	 * 
 	 * @return
 	 */
 	int getPontuacaoCartas();
 
 	/**
-	 * limpa as cartas que o jogador tem na m‹o
+	 * limpa as cartas que o jogador tem na mï¿½o
 	 */
 	void limparCartas();
 
+	boolean estourouPontuacao();
 }

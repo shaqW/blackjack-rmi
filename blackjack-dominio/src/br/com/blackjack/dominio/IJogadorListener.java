@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
 public interface IJogadorListener extends Remote {
 
 	/**
-	 * notifica que um novo turno começou
+	 * notifica que um novo turno comeÔøΩou
 	 * 
 	 * @param jogador
 	 * @throws RemoteException
@@ -20,7 +20,7 @@ public interface IJogadorListener extends Remote {
 	void notificaTurno(IJogador jogador) throws RemoteException;
 
 	/**
-	 * notifica que uma nova carta foi retirada por alguém
+	 * notifica que uma nova carta foi retirada por alguÔøΩm
 	 * 
 	 * @param jogador
 	 * @throws RemoteException
@@ -36,7 +36,7 @@ public interface IJogadorListener extends Remote {
 	void notificarEntradaJogador(IJogador jogador) throws RemoteException;
 
 	/**
-	 * notifica que o jogo começou
+	 * notifica que o jogo comeÔøΩou
 	 * 
 	 * @param jogador
 	 * @throws RemoteException
@@ -53,20 +53,18 @@ public interface IJogadorListener extends Remote {
 	void notificaEstouroPontuacao(IJogador jogador) throws RemoteException;
 
 	/**
-	 * notifica que algum jogador fez um BlackJack e venceu o jogo. Um BlackJack
-	 * ocorre quando algum jogador faz exatos 21 pontos
-	 * 
-	 * @param jogador
-	 * @throws RemoteException
-	 */
-	void notificaVencedorPorBlackJack(IJogador jogador) throws RemoteException;
-
-	/**
 	 * notifica que o jogo chegou ao fim
 	 * 
 	 * @param jogador
 	 * @throws RemoteException
 	 */
 	void notificarFimJogo(IJogador jogador) throws RemoteException;
+
+	/**
+	 * Notifica que √© a vez do Croupier jogar
+	 * 
+	 * @throws RemoteException
+	 */
+	void notificaVezCroupier() throws RemoteException;
 
 }

@@ -10,7 +10,7 @@ import br.com.blackjack.dominio.IBlackJack;
 
 /**
  * Representa um leitor das opcoes que o jogador pode escolher durante o jogo O
- * leitor implementa Runnable porque ele é executado por uma Thread para que não
+ * leitor implementa Runnable porque ele ÔøΩ executado por uma Thread para que nÔøΩo
  * bloqueie os demais jogadores ao realizar a leitura dos dados do teclado
  * 
  * @author fernando
@@ -30,7 +30,7 @@ public class LeitorOpcoes implements Runnable {
 	 * mostra as opcoes que os usuarios podem escolher
 	 */
 	public void mostrarOpcoes() {
-		System.out.println("Escolha uma das opções abaixo:");
+		System.out.println("Escolha uma das op√ß√µes abaixo:");
 		System.out.println("[P]Pedir Mais 1 Carta  ou [T]Terminar a Jogada");
 	}
 
@@ -44,7 +44,7 @@ public class LeitorOpcoes implements Runnable {
 			String opcao = scanner.next();
 			Matcher m = p.matcher(opcao);
 			if (!m.matches()) {
-				System.out.println("Opção inválida!");
+				System.out.println("OpÔøΩÔøΩo invÔøΩlida!");
 				mostrarOpcoes();
 			} else {
 				if (opcao.equals("p") || opcao.equals("P")) {

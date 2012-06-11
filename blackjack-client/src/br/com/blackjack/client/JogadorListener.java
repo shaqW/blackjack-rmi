@@ -11,8 +11,8 @@ import br.com.blackjack.dominio.IJogador;
 import br.com.blackjack.dominio.IJogadorListener;
 
 /**
- * Implementa um listener para os eventos do servidor. Nessa implementação, toda
- * a interação com o usuário é feita pelo terminal
+ * Implementa um listener para os eventos do servidor. Nessa implementaÔøΩÔøΩo, toda
+ * a interaÔøΩÔøΩo com o usuÔøΩrio ÔøΩ feita pelo terminal
  * 
  * @author fernando
  * 
@@ -40,19 +40,21 @@ public class JogadorListener extends UnicastRemoteObject implements
 		mostrarCartas(jogador);
 
 		if (seEhSuaVez(jogador)) {
-			System.out.println(jogador.getNome() + " é sua vez de jogar!");
+			System.out.println(jogador.getNome() + " √© sua vez de jogar!");
 			verificaOpcoesDeJogo(jogador);
 		}
 	}
 
 	private void mostrarCartas(IJogador jogador) {
-		System.out.println("####################  MESA  #########################");
+		System.out
+				.println("####################  MESA  #########################");
 		mostarCartasCroupier();
 		System.out.println("---------------------------------\n");
 
 		mostrarCartasJogadores();
 
-		System.out.println("\n###################################################");
+		System.out
+				.println("\n###################################################");
 	}
 
 	private void mostrarCartasJogadores() {
@@ -99,15 +101,23 @@ public class JogadorListener extends UnicastRemoteObject implements
 			}
 		}
 
+		if (!jogador.getCartas().get(0).isViradaParaBaixo()) {
+			cartasStr += " : " + jogador.getPontuacaoCartas() + " pontos";
+		}
+
 		return cartasStr;
 	}
 
 	@Override
-	public void notificaCartaRetirada(IJogador jogador) throws RemoteException {
-		if (jogo.getJogadorAtual().getNome().equalsIgnoreCase("croupier")) {
-			System.out.println("Todos os jogadores já pegaram suas cartas");
-		}
+	public void notificaVezCroupier() throws RemoteException {
+		System.out.println("\n**************");
+		System.out.println("Todos os jogadores j√° pegaram suas cartas");
+		System.out.println("Agora √© a vez do Croupier realizar sua jogada!");
+		System.out.println("**************\n");
+	}
 
+	@Override
+	public void notificaCartaRetirada(IJogador jogador) throws RemoteException {
 		mostrarCartas(jogador);
 
 		if (seEhSuaVez(jogador)) {
@@ -151,47 +161,37 @@ public class JogadorListener extends UnicastRemoteObject implements
 	public void notificaEstouroPontuacao(IJogador jogador)
 			throws RemoteException {
 		if (seEhSuaVez(jogador)) {
-			System.out.println("Que pena você estourou a pontuação! Você fez "
+			System.out.println("*************");
+			System.out.println("Que pena voc√™ estourou a pontua√ß√£o! Voc√™ fez "
 					+ jogador.getPontuacaoCartas() + " pontos");
+			System.out.println("*************");
 		} else {
+			System.out.println("*************");
 			System.out.println("O jogador " + jogo.getJogadorAtual().getNome()
-					+ " estourou a pontuação! Ele fez"
+					+ " estourou a pontua√ß√£o! Ele fez "
 					+ jogo.getJogadorAtual().getPontuacaoCartas() + " pontos");
-		}
-	}
-
-	@Override
-	public void notificaVencedorPorBlackJack(IJogador jogador)
-			throws RemoteException {
-		mostrarCartas(jogador);
-		if (seEhSuaVez(jogador)) {
-			System.out.println("Você ganhou o jogo! Parabéns!");
-		} else {
-			System.out.println("O jogador " + jogo.getJogadorAtual().getNome()
-					+ " venceu o jogo por fazer um BlackJack!");
+			System.out.println("*************");
 		}
 	}
 
 	@Override
 	public void notificarFimJogo(IJogador jogador) throws RemoteException {
 		mostrarCartas(jogador);
-
+		
 		List<IJogador> jogadores = jogo.getJogadores();
+		System.out.println("*************");
 		for (IJogador j : jogadores) {
 			if (j.getPontuacaoCartas() > jogo.getCroupier()
-					.getPontuacaoCartas()) {
+					.getPontuacaoCartas() && !j.estourouPontuacao()) {
 				System.out.println("Jogador " + j.getNome()
-						+ " venceu o Croupier! Parabéns!");
+						+ " venceu o Croupier! Parab√©ns!");
 			} else {
 				System.out
 						.println("Jogador "
 								+ j.getNome()
-								+ " perdeu para o Croupier! Mais sorte da próxima vez!");
+								+ " perdeu para o Croupier! Mais sorte da prÔøΩxima vez!");
 			}
 		}
-
-		System.out.println("####################################");
-		System.out.println("####### Vamos recomeçar o jogo! #######");
-		System.out.println("####################################");
+		System.out.println("*************");
 	}
 }

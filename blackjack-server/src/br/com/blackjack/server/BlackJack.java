@@ -11,13 +11,13 @@ import br.com.blackjack.server.dominio.Jogador;
 
 /**
  * 
- * Essa classe implementa uma verão simplificada do jogo Blackjack(21). O
+ * Essa classe implementa uma verÔøΩo simplificada do jogo Blackjack(21). O
  * croupier recebe 2 cartas. 1 virada para baixo e outra virada para cima. Em
  * seguida, cada jogador recebe 2 cartas viradas para cima. Cada jogador pode
- * solicitar quantas cartas quiser ao croupier de modo que não ultrapasse 21
+ * solicitar quantas cartas quiser ao croupier de modo que nÔøΩo ultrapasse 21
  * pontos. Quando todos os jogadores comprarem suas cartas, o croupier pega
- * novas carta para si. O vencedor será aquele que tiver mais pontos que o
- * Croupier ou se alguém conseguir alcançar 21 pontos.
+ * novas carta para si. O vencedor serÔøΩ aquele que tiver mais pontos que o
+ * Croupier ou se alguÔøΩm conseguir alcanÔøΩar 21 pontos.
  * 
  */
 public class BlackJack implements IBlackJack {
@@ -37,7 +37,7 @@ public class BlackJack implements IBlackJack {
 	// o jogo do turno atual
 	private IJogador jogadorAtual;
 
-	// o baralho que está sendo usado
+	// o baralho que estÔøΩ sendo usado
 	private Baralho baralho;
 
 	public BlackJack() {
@@ -96,7 +96,7 @@ public class BlackJack implements IBlackJack {
 
 		this.jogadoresTurno = new LinkedList<IJogador>(this.jogadores);
 
-		// inicialmente dá 2 cartas
+		// inicialmente dÔøΩ 2 cartas
 		this.darCartaParaCadaJogador();
 		this.darCartaParaCadaJogador();
 
@@ -131,11 +131,10 @@ public class BlackJack implements IBlackJack {
 		int index = 0;
 		for (IJogadorListener listener : listeners) {
 			try {
-				if (jogadorAtual != null) {
+				if (this.jogadorAtual != null) {
 					listener.notificaTurno(this.jogadores.get(index));
 				} else {
-					this.jogadorAtual = croupier;
-					this.pegarCartaCroupier();
+					listener.notificaVezCroupier();
 				}
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
@@ -143,6 +142,11 @@ public class BlackJack implements IBlackJack {
 			}
 
 			index++;
+		}
+
+		// ou seja, se nao tem mais jogadores.. √© a vez do croupier
+		if (jogadorAtual == null) {
+			this.pegarCartaCroupier();
 		}
 	}
 
@@ -159,12 +163,6 @@ public class BlackJack implements IBlackJack {
 			try {
 				if (jogador.getPontuacaoCartas() > 21) {
 					listener.notificaEstouroPontuacao(this.jogadores.get(index));
-				} else {
-					if (jogador.getPontuacaoCartas() == 21) {
-						listener.notificaVencedorPorBlackJack(this.jogadores
-								.get(index));
-						listener.notificarFimJogo(this.jogadores.get(index));
-					}
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -179,7 +177,7 @@ public class BlackJack implements IBlackJack {
 	}
 
 	/**
-	 * Notifica para todos os listeners que uma carta foi retirada por alguém
+	 * Notifica para todos os listeners que uma carta foi retirada por alguÔøΩm
 	 * 
 	 * @throws RemoteException
 	 */
