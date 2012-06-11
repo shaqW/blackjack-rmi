@@ -102,4 +102,9 @@ public class Jogador implements IJogador {
 			cartas.clear();
 		}
 	}
+
+	@Override
+	public boolean estourouPontuacao() {
+		return getPontuacaoCartas() > 21;
+	}
 }
